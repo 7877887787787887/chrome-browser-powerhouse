@@ -1,0 +1,10 @@
+import fs from "node:fs";
+import path from "node:path";
+import vm from "node:vm";
+import { fileURLToPath } from "node:url";
+const root = path.dirname(fileURLToPath(import.meta.url));
+const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/gi)];
+if (!scripts.length) throw new Error("No inline script found");
+for (const match of scripts) new vm.Script(match[1]);
+console.log(JSON.stringify({ htmlBytes: Buffer.byteLength(html), inlineScripts: scripts.length, jsSyntax: "ok", hasRemoteApi: html.includes("https://msi.tail28f016.ts.net:8443"), hasTypingButton: html.includes('id="type"') }));
