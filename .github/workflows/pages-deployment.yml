@@ -1,0 +1,75 @@
+name: Chrome Browser Pages Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "index.html"
+      - "build-worker.mjs"
+      - "validate-ui.mjs"
+      - "prepare-deploy.mjs"
+      - ".github/workflows/pages-deployment.yml"
+  workflow_dispatch:
+    inputs:
+      confirm_deploy:
+        description: "Deploy to production after validation"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: chrome-browser-pages-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Validate and prepare deployment files
+        shell: bash
+        run: |
+          node --check build-worker.mjs
+          node --check validate-ui.mjs
+          node --check prepare-deploy.mjs
+          node validate-ui.mjs
+          node build-worker.mjs
+          node validate-ui.mjs
+          node prepare-deploy.mjs
+
+      - name: Check Cloudflare credentials are configured
+        if: github.event_name == 'push' || inputs.confirm_deploy == true
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::Missing repository secret CLOUDFLARE_API_TOKEN. Deployment was not attempted."
+            exit 1
+          fi
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Missing repository secret CLOUDFLARE_ACCOUNT_ID. Deployment was not attempted."
+            exit 1
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        if: github.event_name == 'push' || inputs.confirm_deploy == true
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4.86.0 pages deploy dist --project-name=chrome-browser --branch=main
