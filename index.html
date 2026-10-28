@@ -30,7 +30,7 @@ async function startVideoStream(){
  window.videoStreamController?.abort();
  const controller=new AbortController();window.videoStreamController=controller;let url="";
  try{
-  const response=await fetch(apiBase+"/api/stream?fps=15&quality=65",{headers:{Authorization:"Bearer "+token},signal:controller.signal,cache:"no-store"});
+  const response=await fetch(apiBase+"/api/stream?fps=60&quality=50",{headers:{Authorization:"Bearer "+token},signal:controller.signal,cache:"no-store"});
   if(response.status===401){token="";$("login").classList.remove("hidden");$("state").textContent="Session expired. Reconnect to the PC browser.";return;}
   if(!response.ok||!response.body)throw Error("Stream HTTP "+response.status);
   window.streamRetryDelay=500;
@@ -47,7 +47,7 @@ async function startVideoStream(){
     const n=Number(match[1]),p=h+4;if(!n||n>5000000)throw Error("Invalid frame size");if(buffer.length<p+n+2)break;
     const blob=new Blob([buffer.slice(p,p+n)],{type:"image/jpeg"});buffer=buffer.slice(p+n+2);
     const next=URL.createObjectURL(blob),prev=url;url=next;$("screen").src=next;if(prev)URL.revokeObjectURL(prev);
-    frames++;const now=Date.now();if(now-started>=1000){$("perf").textContent=frames+" FPS received � target 15";frames=0;started=now;}
+    frames++;const now=Date.now();if(now-started>=1000){$("perf").textContent=frames+" FPS received � target 60";frames=0;started=now;}
    }
   }
   if(!controller.signal.aborted)throw Error("Stream ended unexpectedly");
