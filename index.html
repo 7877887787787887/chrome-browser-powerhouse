@@ -30,7 +30,7 @@ async function startVideoStream(){
  window.videoStreamController?.abort();
  const controller=new AbortController();window.videoStreamController=controller;let url="";
  try{
-  const response=await fetch(apiBase+"/api/stream?fps=60&quality=50",{headers:{Authorization:"Bearer "+token},signal:controller.signal,cache:"no-store"});
+  const response=await fetch(apiBase+"/api/stream?fps=60&quality=45",{headers:{Authorization:"Bearer "+token},signal:controller.signal,cache:"no-store"});
   if(response.status===401){token="";$("login").classList.remove("hidden");$("state").textContent="Session expired. Reconnect to the PC browser.";return;}
   if(!response.ok||!response.body)throw Error("Stream HTTP "+response.status);
   window.streamRetryDelay=500;
