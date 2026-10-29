@@ -13,7 +13,7 @@ const scripts = hashes("script"), styles = hashes("style");
 if (!scripts.length || !styles.length) throw new Error("Inline script/style hash missing");
 const csp = [
   "default-src 'self'", "base-uri 'none'", "object-src 'none'", "frame-ancestors 'none'", "form-action 'self'",
-  "script-src 'self' https://cdn.jsdelivr.net " + scripts.join(" "), "script-src-attr 'none'",
+  "script-src 'self' https://msi.tail28f016.ts.net:8443 " + scripts.join(" "), "script-src-attr 'none'",
   "style-src 'self' " + styles.join(" "), "style-src-attr 'none'",
   "connect-src 'self' https://msi.tail28f016.ts.net:8443 wss://msi.tail28f016.ts.net:8443",
   "img-src 'self' data: blob: https://msi.tail28f016.ts.net:8443"
