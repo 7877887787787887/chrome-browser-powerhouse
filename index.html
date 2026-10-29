@@ -112,8 +112,8 @@ async function connectDesktop(){
  try{
   if(!desktopRfbLoader)desktopRfbLoader=import('https://cdn.jsdelivr.net/npm/@novnc/novnc@1.7.0/core/rfb.js').then(module=>module.default).catch(error=>{desktopRfbLoader=null;throw error;});
   const RFB=await desktopRfbLoader;if(!token||!$('desktopdialog').open)return;
-  const grant=await req('/api/vnc-ticket','POST',{});if(!grant?.ticket||!token||!$('desktopdialog').open)return;
-  const wsUrl=new URL('/api/vnc',API);wsUrl.protocol=wsUrl.protocol==='https:'?'wss:':'ws:';wsUrl.searchParams.set('ticket',grant.ticket);
+  const grant=await req('/api/desktop/ticket','POST',{});if(!grant?.ticket||!token||!$('desktopdialog').open)return;
+  const wsUrl=new URL('/api/desktop/ws',API);wsUrl.protocol=wsUrl.protocol==='https:'?'wss:':'ws:';wsUrl.searchParams.set('ticket',grant.ticket);
   stage.replaceChildren();const rfb=new RFB(stage,wsUrl.toString(),{shared:true});desktopRfb=rfb;
   rfb.scaleViewport=true;rfb.resizeSession=false;rfb.qualityLevel=desktopFastMode?3:5;rfb.compressionLevel=2;rfb.background='#030507';
   desktopStatus('Connecting securely to the PC…');
