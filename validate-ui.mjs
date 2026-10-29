@@ -15,4 +15,6 @@ if (!html.includes('id="type"')) throw new Error("Typing button missing");
 if (!html.includes("quality=30") && !html.includes("quality=45") && !html.includes("chrome-live-prefs-v4")) throw new Error("Stream setting missing");
 if (html.includes("let prefs={fps:60,quality:45,resolution:'1280x720'};") && !html.includes('id="resetsettings"')) throw new Error("Default settings reset button missing");
 if (!html.includes("Microsoft Edge")) throw new Error("Browser compatibility message missing");
+if (!html.includes('id="remotedesktop"') || !html.includes("remotedesktop.google.com/access")) throw new Error("Remote Desktop shortcut missing");
+if (!html.includes("Could not open Google sign-in on MSI") || !html.includes("Could not resume the remote browser")) throw new Error("Google sign-in recovery messages missing");
 console.log(JSON.stringify({ htmlBytes: Buffer.byteLength(html), inlineScripts: scripts.length, inlineStyles: styles.length, jsSyntax: "ok", noInlineStyleAttributes: true, noInlineEventHandlers: true, hasRemoteApi: true, hasTypingButton: true, streamQuality: 30 }));
