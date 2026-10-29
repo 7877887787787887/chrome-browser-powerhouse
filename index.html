@@ -109,10 +109,10 @@ $('type').onclick=()=>{if(!token||desktopMode)return;flushType();$('typedialog')
 $('canceltype').onclick=()=>$('typedialog').close();
 $('sendtype').onclick=async()=>{const text=$('typetext').value;if(!text){$('typedialog').close();return;}$('sendtype').disabled=true;try{const result=await action('type',{text});if(result){$('typetext').value='';$('typedialog').close();screen.focus();}}finally{$('sendtype').disabled=false;}};
 $('diagnose').onclick=async()=>{$('diagnostics').classList.remove('hidden');$('diagnostics').textContent='Checking engine and stream...';try{const start=performance.now(),data=await req('/api/diagnostics');$('diagnostics').textContent=JSON.stringify({uiVersion:VERSION,engineRoundTripMs:Math.round(performance.now()-start),transport:desktopMode?'Desktop':transport,requestedFps:prefs.fps,quality:prefs.quality,resolution:remoteSize,clientSkipped:stats.skipped,...data,recentErrors:errors.slice(-5)},null,2);}catch(e){$('diagnostics').textContent=e.message;}};
-let resumeTimer=0,lastResumeAt=0;
+let resumeTimer=0;
 function recoverVisibleStream(){
  if(document.visibilityState!=='visible'||!token||desktopMode||paused)return;
- const now=performance.now();if(now-lastResumeAt<800)return;lastResumeAt=now;
+ 
  clearTimeout(resumeTimer);
  resumeTimer=setTimeout(async()=>{
   if(document.visibilityState!=='visible'||!token||desktopMode||paused)return;
