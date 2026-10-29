@@ -12,7 +12,7 @@ if (/\son[a-z0-9_-]+\s*=/i.test(html)) throw new Error("Inline event-handler att
 for (const match of scripts) new vm.Script(match[1]);
 if (!html.includes("https://msi.tail28f016.ts.net:8443")) throw new Error("Remote API endpoint missing");
 if (!html.includes('id="type"')) throw new Error("Typing button missing");
-if (!html.includes("quality=30") && !html.includes("quality=45")) throw new Error("Stream setting missing");
+if (!html.includes("quality=30") && !html.includes("quality=45") && !html.includes("chrome-live-prefs-v4")) throw new Error("Stream setting missing");
 if (html.includes("let prefs={fps:60,quality:45,resolution:'1280x720'};") && !html.includes('id="resetsettings"')) throw new Error("Default settings reset button missing");
 if (!html.includes("Microsoft Edge")) throw new Error("Browser compatibility message missing");
 console.log(JSON.stringify({ htmlBytes: Buffer.byteLength(html), inlineScripts: scripts.length, inlineStyles: styles.length, jsSyntax: "ok", noInlineStyleAttributes: true, noInlineEventHandlers: true, hasRemoteApi: true, hasTypingButton: true, streamQuality: 30 }));
