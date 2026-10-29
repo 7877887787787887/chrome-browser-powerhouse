@@ -109,7 +109,24 @@ $('type').onclick=()=>{if(!token||desktopMode)return;flushType();$('typedialog')
 $('canceltype').onclick=()=>$('typedialog').close();
 $('sendtype').onclick=async()=>{const text=$('typetext').value;if(!text){$('typedialog').close();return;}$('sendtype').disabled=true;try{const result=await action('type',{text});if(result){$('typetext').value='';$('typedialog').close();screen.focus();}}finally{$('sendtype').disabled=false;}};
 $('diagnose').onclick=async()=>{$('diagnostics').classList.remove('hidden');$('diagnostics').textContent='Checking engine and stream...';try{const start=performance.now(),data=await req('/api/diagnostics');$('diagnostics').textContent=JSON.stringify({uiVersion:VERSION,engineRoundTripMs:Math.round(performance.now()-start),transport:desktopMode?'Desktop':transport,requestedFps:prefs.fps,quality:prefs.quality,resolution:remoteSize,clientSkipped:stats.skipped,...data,recentErrors:errors.slice(-5)},null,2);}catch(e){$('diagnostics').textContent=e.message;}};
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(!desktopMode){refresh();startStream();}}else{stopStream();if(!desktopMode)connection('Paused while hidden');}});
+let resumeTimer=0,lastResumeAt=0;
+function recoverVisibleStream(){
+ if(document.visibilityState!=='visible'||!token||desktopMode||paused)return;
+ const now=performance.now();if(now-lastResumeAt<800)return;lastResumeAt=now;
+ clearTimeout(resumeTimer);
+ resumeTimer=setTimeout(async()=>{
+  if(document.visibilityState!=='visible'||!token||desktopMode||paused)return;
+  wsFailures=0;retryDelay=500;
+  try{await refresh();}catch(e){recordError(e);}
+  if(canStream())startStream();
+ },150);
+}
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='visible')recoverVisibleStream();
+ else if(token&&!desktopMode)connection('Backgrounded - stream retained','warning');
+});
+window.addEventListener('pageshow',recoverVisibleStream);
+window.addEventListener('focus',recoverVisibleStream);
 window.addEventListener('pagehide',()=>{stopStream();disconnectDesktop(true);});
 window.addEventListener('offline',()=>{stopStream();disconnectDesktop(true);connection('Network offline','warning');showOverlay('Network offline. Reconnect when the network returns.');});
 window.addEventListener('online',()=>{wsFailures=0;retryDelay=500;if(desktopMode)connectDesktop();else{refresh();startStream();}});
